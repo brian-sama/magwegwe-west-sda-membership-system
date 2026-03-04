@@ -15,11 +15,20 @@ const AddMemberForm: React.FC<AddMemberFormProps> = ({ onAdd }) => {
     email: '',
     phone: '',
     status: MemberStatus.BAPTIZED,
+    department: '',
     baptismDate: '',
     previousChurch: '',
     boardApprovalDate: '',
     address: ''
   });
+
+  const departmentOptions = ['Pathfinders', 'Adventurers', 'Dorcas', 'AMO'];
+
+  const toggleDepartment = (dept: string) => {
+    const current = formData.department ? formData.department.split(',').map(d => d.trim()).filter(Boolean) : [];
+    const updated = current.includes(dept) ? current.filter(d => d !== dept) : [...current, dept];
+    setFormData({ ...formData, department: updated.join(', ') });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,15 +94,15 @@ const AddMemberForm: React.FC<AddMemberFormProps> = ({ onAdd }) => {
             />
           </div>
           <div className="space-y-2 md:col-span-2">
-             <label className="block text-sm font-semibold text-gray-700">Phone Number</label>
-             <input
-               required
-               type="tel"
-               className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-               placeholder="555-0000"
-               value={formData.phone}
-               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-             />
+            <label className="block text-sm font-semibold text-gray-700">Phone Number</label>
+            <input
+              required
+              type="tel"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+              placeholder="555-0000"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            />
           </div>
         </div>
 
@@ -107,6 +116,30 @@ const AddMemberForm: React.FC<AddMemberFormProps> = ({ onAdd }) => {
             value={formData.address}
             onChange={(e) => setFormData({ ...formData, address: e.target.value })}
           />
+        </div>
+
+        {/* Department Assignment */}
+        <div className="p-6 bg-emerald-50 rounded-xl space-y-4">
+          <label className="block text-sm font-bold text-emerald-900">Department Assignment</label>
+          <p className="text-xs text-emerald-700">Select all departments this member belongs to:</p>
+          <div className="flex flex-wrap gap-3">
+            {departmentOptions.map(dept => {
+              const isSelected = formData.department.split(',').map(d => d.trim()).includes(dept);
+              return (
+                <button
+                  key={dept}
+                  type="button"
+                  onClick={() => toggleDepartment(dept)}
+                  className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all border shadow-sm ${isSelected
+                      ? 'bg-emerald-600 text-white border-emerald-700 shadow-emerald-200'
+                      : 'bg-white text-slate-600 border-slate-200 hover:bg-emerald-50 hover:border-emerald-300'
+                    }`}
+                >
+                  {isSelected ? '✓ ' : ''}{dept}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div className="p-6 bg-indigo-50 rounded-xl space-y-6">

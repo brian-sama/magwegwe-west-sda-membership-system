@@ -1,0 +1,6 @@
+First Name,Last Name,National ID,Email,Phone,Status,Department,Registration Date,Baptism Date,Previous Church,Address,Notes
+John,Moyo,63-123456A77,john.moyo@email.com,0771234567,BAPTIZED,Pathfinders,2024-01-15,2023-06-10,,123 Lobengula Street Magwegwe West,Active elder
+Jane,Ncube,63-789012B88,jane.ncube@email.com,0772345678,ACTIVE,"Dorcas, AMO",2024-03-20,,,45 Masotsha Ave Magwegwe,New member
+Peter,Dube,63-345678C99,peter.dube@email.com,0773456789,TRANSFERRED_IN,Adventurers,2024-05-01,,Central SDA Church,67 Nketa Drive,Transferred in from Nkulumane
+Mary,Sibanda,63-901234D00,mary.sibanda@email.com,0774567890,BAPTIZED,"Dorcas",2023-11-01,2023-10-15,,89 Pumula Road,Youth leader
+David,Mpofu,63-567890E11,david.mpofu@email.com,0775678901,BAPTIZED,"Pathfinders, AMO",2024-02-28,2024-01-20,,12 Emganwini Close,Deacon

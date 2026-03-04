@@ -5,20 +5,28 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:server": "node server/index.js",
+    "dev:api": "cd backend && php artisan serve",
+    "dev:all": "concurrently \"npm run dev\" \"npm run dev:server\"",
+    "dev:laravel": "concurrently \"npm run dev\" \"npm run dev:api\"",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "recharts": "^3.7.0",
     "@google/genai": "^1.40.0",
-    "react-dom": "^19.2.4",
-    "react": "^19.2.4",
     "jspdf": "2.5.1",
-    "jspdf-autotable": "3.8.2"
+    "jspdf-autotable": "3.8.2",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "recharts": "^3.7.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
+    "autoprefixer": "^10.4.27",
+    "concurrently": "^9.2.1",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^4.2.1",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
   }

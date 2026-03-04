@@ -1,0 +1,53 @@
+Magwegwe West SDA Membership System - cPanel Deployment Instructions
+
+This package contains:
+1. public_html/ - The React frontend (to be uploaded to your cPanel public_html folder).
+2. api_app/    - The Laravel backend (to be uploaded to your cPanel home directory, e.g. /home/username/api_app).
+
+---
+STEP 1: DATABASE SETUP
+---
+1. Log in to cPanel and go to "MySQL Databases".
+2. Create a new database (e.g., `church_membership`).
+3. Create a new database user and assign them to the database with all privileges.
+4. Note down the database name, username, and password.
+
+---
+STEP 2: BACKEND DEPLOYMENT (API)
+---
+1. Upload the `api_app/` folder to your cPanel home directory (e.g., `/home/username/api_app`).
+   NB: It is safer to keep this outside `public_html`.
+2. In cPanel, go to "Subdomains" and create `api.yourdomain.com`.
+3. Set the "Document Root" for this subdomain to `/home/username/api_app/public`.
+4. Create a `.env` file inside `api_app/` (copy from `.env.example`).
+5. Update the `.env` file with your production database credentials:
+   DB_DATABASE=your_db_name
+   DB_USERNAME=your_db_user
+   DB_PASSWORD=your_db_pass
+   APP_ENV=production
+   APP_DEBUG=false
+   APP_URL=https://api.yourdomain.com
+6. SSH into your server (or use cPanel Terminal) and run:
+   cd ~/api_app
+   php artisan key:generate
+   php artisan migrate --force
+   php artisan db:seed --force
+   php artisan config:cache
+   php artisan route:cache
+
+---
+STEP 3: FRONTEND DEPLOYMENT
+---
+1. Upload the contents of the `public_html/` folder to your cPanel `public_html/` directory.
+2. Ensure the `.htaccess` file is present (it handles the React routing).
+3. If your API URL is different from `https://api.yourdomain.com/api/v1`, you may need to rebuild or update the URL in your configuration.
+
+---
+STEP 4: CRON JOB (Optional but Recommended)
+---
+Add a Cron Job in cPanel to run every minute:
+* * * * * /usr/local/bin/php /home/username/api_app/artisan schedule:run >> /dev/null 2>&1
+
+---
+SECURITY NOTE:
+Ensure that `api_app/.env` is NOT accessible from the web. By placing `api_app` outside `public_html`, you already ensure this.

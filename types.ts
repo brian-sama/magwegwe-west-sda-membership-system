@@ -1,8 +1,8 @@
-
 export enum UserRole {
-  ADMIN = 'ADMIN',
-  PASTOR = 'PASTOR',
-  CLERK = 'CLERK'
+  ADMIN = 'Admin',
+  PASTOR = 'Pastor',
+  CLERK = 'Clerk',
+  VIEWER = 'Viewer',
 }
 
 export enum MemberStatus {
@@ -10,17 +10,17 @@ export enum MemberStatus {
   TRANSFERRED_IN = 'TRANSFERRED_IN',
   ACTIVE = 'ACTIVE',
   INACTIVE = 'INACTIVE',
-  TRANSFERRED_OUT = 'TRANSFERRED_OUT'
+  TRANSFERRED_OUT = 'TRANSFERRED_OUT',
 }
 
 export enum YouthClubType {
   PATHFINDER = 'PATHFINDER',
-  ADVENTURER = 'ADVENTURER'
+  ADVENTURER = 'ADVENTURER',
 }
 
 export enum SocietyType {
   DORCAS = 'DORCAS',
-  AMO = 'AMO'
+  AMO = 'AMO',
 }
 
 export interface User {
@@ -29,6 +29,7 @@ export interface User {
   email: string;
   role: UserRole;
   lastLogin: string;
+  password?: string;
 }
 
 export interface Member {
@@ -39,6 +40,7 @@ export interface Member {
   email: string;
   phone: string;
   status: MemberStatus;
+  department?: string;
   registrationDate: string;
   baptismDate?: string;
   previousChurch?: string;
@@ -58,9 +60,10 @@ export interface YouthMember {
   parentPhone: string;
   grade: string;
   club: YouthClubType;
-  rank: string; // e.g., Friend, Companion, Busy Bee, Sunbeam
+  rank: string;
   healthNotes?: string;
   registrationDate: string;
+  school?: string;
 }
 
 export interface SocietyMember {
@@ -72,6 +75,38 @@ export interface SocietyMember {
   type: SocietyType;
   skills: string;
   registrationDate: string;
+}
+
+export interface AttendanceRecord {
+  id: string;
+  memberId: string;
+  memberName: string;
+  eventType: 'Sabbath' | 'Youth' | 'Society' | 'Campmeeting';
+  date: string;
+  status: 'Present' | 'Absent' | 'Late';
+}
+
+export interface Society {
+  id: string;
+  name: string;
+  leader?: string;
+  assistantLeader?: string;
+  meetingDay?: string;
+  memberCount?: number;
+}
+
+export interface ReportRequest {
+  type: 'members' | 'youth' | 'societies' | 'attendance';
+  format: 'pdf' | 'xlsx';
+}
+
+export interface SearchResult {
+  id: string;
+  first_name: string;
+  last_name: string;
+  phone?: string;
+  email?: string;
+  status: string;
 }
 
 export interface AuditLog {

@@ -10,20 +10,79 @@ interface MemberDirectoryProps {
   userRole: UserRole;
   onTransferOut: (memberId: string, destinationChurch: string, boardDate: string) => void;
   onRestoreMember: (memberId: string, comment: string, date: string) => void;
+  onAddMember?: () => void;
+  onImportMembers?: (members: Member[]) => void;
 }
 
-const MemberDirectory: React.FC<MemberDirectoryProps> = ({ members, userRole, onTransferOut, onRestoreMember }) => {
+const MemberDirectory: React.FC<MemberDirectoryProps> = ({ members, userRole, onTransferOut, onRestoreMember, onAddMember, onImportMembers }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [importStatus, setImportStatus] = useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleCSVImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !onImportMembers) return;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const text = evt.target?.result as string;
+        const lines = text.split('\n').filter(l => l.trim());
+        if (lines.length < 2) { setImportStatus('File is empty or has no data rows'); return; }
+
+        const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+        const imported: Member[] = [];
+
+        for (let i = 1; i < lines.length; i++) {
+          const values = lines[i].split(',').map(v => v.trim());
+          if (values.length < 2) continue;
+
+          const get = (key: string) => {
+            const idx = headers.indexOf(key);
+            return idx >= 0 ? values[idx] || '' : '';
+          };
+
+          imported.push({
+            id: Date.now().toString() + i,
+            firstName: get('first name') || get('firstname') || get('first_name'),
+            lastName: get('last name') || get('lastname') || get('last_name'),
+            nationalId: get('national id') || get('nationalid') || get('national_id') || get('id number'),
+            email: get('email') || get('e-mail') || '',
+            phone: get('phone') || get('phone number') || get('cell') || '',
+            status: (get('status') as MemberStatus) || MemberStatus.ACTIVE,
+            department: get('department') || get('departments') || '',
+            registrationDate: get('registration date') || get('date joined') || new Date().toISOString(),
+            baptismDate: get('baptism date') || get('baptism_date') || '',
+            previousChurch: get('previous church') || get('previous_church') || '',
+            address: get('address') || '',
+            notes: get('notes') || ''
+          });
+        }
+
+        if (imported.length > 0) {
+          onImportMembers(imported);
+          setImportStatus(`Successfully imported ${imported.length} members`);
+          setTimeout(() => setImportStatus(null), 4000);
+        } else {
+          setImportStatus('No valid records found in file');
+        }
+      } catch (err) {
+        setImportStatus('Error parsing file: ' + (err as Error).message);
+      }
+    };
+    reader.readAsText(file);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
   const [selectedYear, setSelectedYear] = useState<string>('ALL');
-  
+
   // State for Member Details and Action Modals
   const [memberModal, setMemberModal] = useState<{ isOpen: boolean, member: Member | null, mode: 'VIEW' | 'TRANSFER' | 'RESTORE' }>({
     isOpen: false,
     member: null,
     mode: 'VIEW'
   });
-  
+
   const [destinationChurch, setDestinationChurch] = useState('');
   const [boardApprovalDate, setBoardApprovalDate] = useState('');
   const [restorationComment, setRestorationComment] = useState('');
@@ -48,12 +107,12 @@ const MemberDirectory: React.FC<MemberDirectoryProps> = ({ members, userRole, on
 
   const filteredMembers = members.filter(member => {
     const s = searchQuery.toLowerCase();
-    const matchesSearch = 
+    const matchesSearch =
       member.firstName.toLowerCase().includes(s) ||
       member.lastName.toLowerCase().includes(s) ||
       member.email.toLowerCase().includes(s) ||
       member.nationalId.toLowerCase().includes(s);
-    
+
     let matchesFilter = false;
     if (filterStatus === 'ALL') {
       matchesFilter = true;
@@ -68,7 +127,7 @@ const MemberDirectory: React.FC<MemberDirectoryProps> = ({ members, userRole, on
     } else {
       matchesFilter = member.status === filterStatus;
     }
-    
+
     return matchesSearch && matchesFilter;
   });
 
@@ -125,7 +184,7 @@ const MemberDirectory: React.FC<MemberDirectoryProps> = ({ members, userRole, on
 
     let reportMembers = [...filteredMembers];
     let reportTitle = filterStatus === 'ALL' ? "Full Membership Registry" : `${filterStatus.replace('_', ' ')} Category Report`;
-    
+
     if (filterStatus === MemberStatus.ACTIVE) {
       reportTitle = "Active Membership List (Aggregated)";
     } else if (filterStatus === MemberStatus.BAPTIZED && selectedYear !== 'ALL') {
@@ -141,11 +200,11 @@ const MemberDirectory: React.FC<MemberDirectoryProps> = ({ members, userRole, on
     doc.setFontSize(22);
     doc.setTextColor(30, 41, 59);
     doc.text(`${APP_NAME}`, 14, 22);
-    
+
     doc.setFontSize(14);
     doc.setTextColor(79, 70, 229);
     doc.text(reportTitle, 14, 32);
-    
+
     doc.setFontSize(10);
     doc.setTextColor(100);
     doc.text(`Authorized Export by: ${userRole} | Date: ${dateStr} | Records: ${reportMembers.length}`, 14, 40);
@@ -157,10 +216,10 @@ const MemberDirectory: React.FC<MemberDirectoryProps> = ({ members, userRole, on
       m.phone,
       getRelevantDate(m),
       m.status === MemberStatus.TRANSFERRED_OUT ? "" : "GOOD STANDING",
-      m.status === MemberStatus.TRANSFERRED_IN 
+      m.status === MemberStatus.TRANSFERRED_IN
         ? `FROM: ${m.previousChurch || "N/A"}`.toUpperCase()
-        : m.status === MemberStatus.TRANSFERRED_OUT 
-          ? `TO: ${m.destinationChurch || "TRANSFERRED OUT"}`.toUpperCase() 
+        : m.status === MemberStatus.TRANSFERRED_OUT
+          ? `TO: ${m.destinationChurch || "TRANSFERRED OUT"}`.toUpperCase()
           : "MAG-WEST SDA"
     ]);
 
@@ -195,7 +254,7 @@ const MemberDirectory: React.FC<MemberDirectoryProps> = ({ members, userRole, on
           <div className="flex flex-col md:flex-row items-start md:items-center gap-3 w-full md:w-auto">
             <span className="text-sm font-bold text-slate-500 uppercase tracking-tight whitespace-nowrap">View Category:</span>
             <div className="flex flex-wrap gap-2">
-              <button 
+              <button
                 onClick={() => { setFilterStatus('ALL'); setSelectedYear('ALL'); }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${filterStatus === 'ALL' ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-100'}`}
               >
@@ -229,22 +288,47 @@ const MemberDirectory: React.FC<MemberDirectoryProps> = ({ members, userRole, on
             )}
           </div>
         </div>
-        
+
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto justify-end">
-          <button 
+          {onAddMember && (
+            <button
+              onClick={onAddMember}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 whitespace-nowrap bg-emerald-600 text-white hover:bg-emerald-700"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" x2="12" y1="5" y2="19" /><line x1="5" x2="19" y1="12" y2="12" /></svg>
+              Add Member
+            </button>
+          )}
+          {onImportMembers && (
+            <>
+              <input type="file" ref={fileInputRef} accept=".csv" onChange={handleCSVImport} className="hidden" />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 whitespace-nowrap bg-violet-600 text-white hover:bg-violet-700"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" x2="12" y1="3" y2="15" /></svg>
+                Import CSV
+              </button>
+            </>
+          )}
+          <button
             onClick={downloadPDFReport}
             disabled={filterStatus === 'ALL'}
             title={filterStatus === 'ALL' ? "Select a specific category to export a report" : "Export category report as PDF"}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 whitespace-nowrap ${
-              filterStatus === 'ALL' 
-                ? 'bg-slate-200 text-slate-400 cursor-not-allowed opacity-60 shadow-none' 
-                : 'bg-indigo-600 text-white hover:bg-indigo-700'
-            }`}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 whitespace-nowrap ${filterStatus === 'ALL'
+              ? 'bg-slate-200 text-slate-400 cursor-not-allowed opacity-60 shadow-none'
+              : 'bg-indigo-600 text-white hover:bg-indigo-700'
+              }`}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-            Export List as PDF
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg>
+            Export PDF
           </button>
         </div>
+        {importStatus && (
+          <div className={`mt-2 px-4 py-2 rounded-lg text-sm font-bold ${importStatus.includes('Success') ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+            {importStatus}
+          </div>
+        )}
       </div>
 
       <div className="overflow-x-auto flex-1">
@@ -306,6 +390,14 @@ const MemberDirectory: React.FC<MemberDirectoryProps> = ({ members, userRole, on
                         <span className="text-[10px] font-black uppercase tracking-tight text-orange-600">
                           TO: {member.destinationChurch || "TRANSFERRED OUT"}
                         </span>
+                      ) : member.department ? (
+                        <div className="flex flex-wrap gap-1">
+                          {member.department.split(',').map(d => d.trim()).filter(Boolean).map(dept => (
+                            <span key={dept} className="px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wider bg-violet-50 text-violet-600 border border-violet-200">
+                              {dept}
+                            </span>
+                          ))}
+                        </div>
                       ) : (
                         <span className="text-[10px] font-black uppercase tracking-tight text-slate-500">
                           MAG-WEST SDA
@@ -319,14 +411,14 @@ const MemberDirectory: React.FC<MemberDirectoryProps> = ({ members, userRole, on
                             {!isTransferredOut && (
                               <>
                                 {isInactive ? (
-                                  <button 
+                                  <button
                                     onClick={() => openMemberModal(member, 'RESTORE')}
                                     className="px-3 py-1.5 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
                                   >
                                     Restore
                                   </button>
                                 ) : (
-                                  <button 
+                                  <button
                                     onClick={() => openMemberModal(member, 'TRANSFER')}
                                     className="px-3 py-1.5 bg-orange-50 text-orange-600 border border-orange-200 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-orange-600 hover:text-white transition-all shadow-sm"
                                   >
@@ -335,7 +427,7 @@ const MemberDirectory: React.FC<MemberDirectoryProps> = ({ members, userRole, on
                                 )}
                               </>
                             )}
-                            <button 
+                            <button
                               onClick={() => openMemberModal(member, 'VIEW')}
                               className="p-2.5 bg-slate-50 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all border border-transparent hover:border-indigo-100 shadow-sm"
                               title="Quick View"
@@ -344,7 +436,7 @@ const MemberDirectory: React.FC<MemberDirectoryProps> = ({ members, userRole, on
                             </button>
                           </>
                         ) : (
-                          <button 
+                          <button
                             onClick={() => openMemberModal(member, 'VIEW')}
                             className="px-4 py-2 bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-sm flex items-center gap-2"
                           >
@@ -372,7 +464,7 @@ const MemberDirectory: React.FC<MemberDirectoryProps> = ({ members, userRole, on
           </tbody>
         </table>
       </div>
-      
+
       <div className="p-4 border-t bg-slate-50 text-[10px] font-black text-slate-400 flex justify-between items-center uppercase tracking-[0.15em]">
         <div className="flex gap-4">
           <p>Registry View: {userRole}</p>
@@ -385,15 +477,13 @@ const MemberDirectory: React.FC<MemberDirectoryProps> = ({ members, userRole, on
         <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-lg flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-[2rem] max-w-lg w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300 border border-white/20">
             {/* Compact Modal Header */}
-            <div className={`px-8 py-6 border-b flex justify-between items-start ${
-              memberModal.mode === 'TRANSFER' ? 'bg-orange-50' : 
+            <div className={`px-8 py-6 border-b flex justify-between items-start ${memberModal.mode === 'TRANSFER' ? 'bg-orange-50' :
               memberModal.mode === 'RESTORE' ? 'bg-emerald-50' : 'bg-slate-50'
-            }`}>
+              }`}>
               <div className="flex items-center gap-4">
-                <div className={`w-16 h-16 rounded-[1.2rem] flex items-center justify-center text-2xl font-black text-white shadow-lg ${
-                  memberModal.mode === 'TRANSFER' ? 'bg-orange-500' : 
+                <div className={`w-16 h-16 rounded-[1.2rem] flex items-center justify-center text-2xl font-black text-white shadow-lg ${memberModal.mode === 'TRANSFER' ? 'bg-orange-500' :
                   memberModal.mode === 'RESTORE' ? 'bg-emerald-500' : 'bg-indigo-600'
-                }`}>
+                  }`}>
                   {memberModal.member.firstName.charAt(0)}{memberModal.member.lastName.charAt(0)}
                 </div>
                 <div>
@@ -410,8 +500,8 @@ const MemberDirectory: React.FC<MemberDirectoryProps> = ({ members, userRole, on
                   </div>
                 </div>
               </div>
-              <button 
-                onClick={() => setMemberModal({ isOpen: false, member: null, mode: 'VIEW' })} 
+              <button
+                onClick={() => setMemberModal({ isOpen: false, member: null, mode: 'VIEW' })}
                 className="p-2 bg-white rounded-xl text-slate-400 hover:text-slate-900 shadow-md transition-all active:scale-90 border border-slate-100"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -443,7 +533,7 @@ const MemberDirectory: React.FC<MemberDirectoryProps> = ({ members, userRole, on
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="space-y-4">
                       <h5 className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-400 border-b border-slate-100 pb-1">Record Dates</h5>
                       <div className="space-y-3">
@@ -471,11 +561,11 @@ const MemberDirectory: React.FC<MemberDirectoryProps> = ({ members, userRole, on
                   </div>
 
                   {memberModal.member.status === MemberStatus.TRANSFERRED_IN && (
-                     <div className="bg-purple-50 p-4 rounded-2xl border border-purple-100">
-                        <h5 className="text-[8px] font-black uppercase tracking-[0.25em] text-purple-600 mb-2">Origin Church</h5>
-                        <p className="text-xs font-bold text-slate-700">{memberModal.member.previousChurch || "Information Not Provided"}</p>
-                        <p className="text-[9px] text-slate-400 mt-2 font-medium italic">Membership transfer formally accepted on: {memberModal.member.boardApprovalDate || "Date Pending"}</p>
-                     </div>
+                    <div className="bg-purple-50 p-4 rounded-2xl border border-purple-100">
+                      <h5 className="text-[8px] font-black uppercase tracking-[0.25em] text-purple-600 mb-2">Origin Church</h5>
+                      <p className="text-xs font-bold text-slate-700">{memberModal.member.previousChurch || "Information Not Provided"}</p>
+                      <p className="text-[9px] text-slate-400 mt-2 font-medium italic">Membership transfer formally accepted on: {memberModal.member.boardApprovalDate || "Date Pending"}</p>
+                    </div>
                   )}
 
                   {memberModal.member.status === MemberStatus.TRANSFERRED_OUT && (
@@ -493,14 +583,14 @@ const MemberDirectory: React.FC<MemberDirectoryProps> = ({ members, userRole, on
                     {isAdmin && memberModal.member.status !== MemberStatus.TRANSFERRED_OUT && (
                       <>
                         {memberModal.member.status === MemberStatus.INACTIVE ? (
-                          <button 
+                          <button
                             onClick={() => setMemberModal({ ...memberModal, mode: 'RESTORE' })}
                             className="flex-1 py-3 bg-emerald-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg hover:bg-emerald-700 transition-all"
                           >
                             Restore
                           </button>
                         ) : (
-                          <button 
+                          <button
                             onClick={() => setMemberModal({ ...memberModal, mode: 'TRANSFER' })}
                             className="flex-1 py-3 bg-orange-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg hover:bg-orange-700 transition-all flex items-center justify-center gap-2"
                           >
@@ -510,7 +600,7 @@ const MemberDirectory: React.FC<MemberDirectoryProps> = ({ members, userRole, on
                         )}
                       </>
                     )}
-                    <button 
+                    <button
                       onClick={() => setMemberModal({ isOpen: false, member: null, mode: 'VIEW' })}
                       className="flex-1 py-3 bg-slate-100 text-slate-500 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all border border-slate-200"
                     >

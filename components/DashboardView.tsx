@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Member, AuditLog, UserRole, MemberStatus } from '../types';
 import { ICONS } from '../constants';
-import { generateMembershipReport } from '../geminiService';
+import { api } from '../src/services/api';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 interface DashboardViewProps {
@@ -42,10 +42,13 @@ const DashboardView: React.FC<DashboardViewProps> = ({ members, logs, userRole }
 
   const handleGenerateReport = async () => {
     setLoadingAi(true);
-    // For non-admins, we only send member data to avoid leaking audit logs via AI
-    const reportContextLogs = userRole === UserRole.ADMIN ? logs : [];
-    const report = await generateMembershipReport(members, reportContextLogs);
-    setAiReport(report || 'Could not generate report.');
+    try {
+      const contextHint = userRole === UserRole.ADMIN ? 'Include security observations.' : 'Focus on membership growth and care.';
+      const result = await api.analytics.insights(`Summarize membership trends. ${contextHint}`);
+      setAiReport(result?.insight || 'Could not generate report.');
+    } catch {
+      setAiReport('Could not generate report.');
+    }
     setLoadingAi(false);
   };
 

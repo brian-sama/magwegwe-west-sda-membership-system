@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { User, UserRole } from '../types';
 import { ICONS } from '../constants';
@@ -15,7 +14,8 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, onAddUser, onDel
   const [newUser, setNewUser] = useState({
     name: '',
     email: '',
-    role: UserRole.CLERK
+    role: UserRole.CLERK,
+    password: '',
   });
 
   const handleAdd = (e: React.FormEvent) => {
@@ -23,9 +23,9 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, onAddUser, onDel
     onAddUser({
       id: Math.random().toString(36).substr(2, 9),
       ...newUser,
-      lastLogin: 'Never'
+      lastLogin: 'Never',
     });
-    setNewUser({ name: '', email: '', role: UserRole.CLERK });
+    setNewUser({ name: '', email: '', role: UserRole.CLERK, password: '' });
     setShowAddModal(false);
   };
 
@@ -137,6 +137,17 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, onAddUser, onDel
                 />
               </div>
               <div className="space-y-1">
+                <label className="text-sm font-semibold text-gray-700">Temporary Password</label>
+                <input
+                  required
+                  type="password"
+                  minLength={8}
+                  className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
+                  value={newUser.password}
+                  onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                />
+              </div>
+              <div className="space-y-1">
                 <label className="text-sm font-semibold text-gray-700">Access Level</label>
                 <select
                   className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
@@ -146,6 +157,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, onAddUser, onDel
                   <option value={UserRole.ADMIN}>System Admin</option>
                   <option value={UserRole.PASTOR}>Pastor</option>
                   <option value={UserRole.CLERK}>Church Clerk</option>
+                  <option value={UserRole.VIEWER}>Viewer</option>
                 </select>
               </div>
               <div className="pt-4 flex gap-3">
