@@ -1,0 +1,39 @@
+<?php
+
+return [
+    // Example overrides when .env cannot be used on your host.
+    // 'db' => [
+    //     'host' => 'localhost',
+    //     'port' => 3306,
+    //     'database' => 'your_target_database',
+    //     'username' => 'your_target_db_user',
+    //     'password' => 'your_target_db_password',
+    //     'charset' => 'utf8mb4',
+    // ],
+    // 'source_db' => [
+    //     'host' => 'localhost',
+    //     'port' => 3306,
+    //     'database' => 'your_source_database',
+    //     'username' => 'your_source_db_user',
+    //     'password' => 'your_source_db_password',
+    //     'charset' => 'utf8mb4',
+    // ],
+    // 'jwt' => [
+    //     'secret' => 'change_this_to_a_long_random_secret',
+    //     'ttl_seconds' => 28800,
+    // ],
+    // 'services' => [
+    //     'africastalking' => [
+    //         'username' => '',
+    //         'key' => '',
+    //         'from' => '',
+    //     ],
+    //     'gemini' => [
+    //         'key' => '',
+    //         'model' => 'gemini-1.5-flash',
+    //     ],
+    // ],
+    // 'cors' => [
+    //     'allowed_origins' => ['https://example.com'],
+    // ],
+];

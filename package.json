@@ -4,11 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "dev:server": "node server/index.js",
-    "dev:api": "cd backend && php artisan serve",
-    "dev:all": "concurrently \"npm run dev\" \"npm run dev:server\"",
-    "dev:laravel": "concurrently \"npm run dev\" \"npm run dev:api\"",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "vite",
+    "dev:backend": "npm run dev --prefix server",
+    "dev:api": "cd api && php -S localhost:8000",
+    "dev:laravel": "concurrently \"npm run dev:frontend\" \"cd backend && php artisan serve\"",
     "build": "vite build",
     "preview": "vite preview"
   },
@@ -21,6 +21,7 @@
     "recharts": "^3.7.0"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.1",
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
     "autoprefixer": "^10.4.27",

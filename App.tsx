@@ -220,15 +220,7 @@ const App: React.FC = () => {
       <aside className="w-64 bg-slate-900 text-white flex flex-col hidden md:flex">
         <div className="p-6 border-b border-slate-800">
           <h1 className="text-sm font-bold flex items-center gap-3">
-            <svg width="28" height="32" viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
-              <path d="M30 140 L100 120 L170 140 L170 190 L100 170 L30 190 Z" fill="#1a6b5a" stroke="#14574a" strokeWidth="2" />
-              <path d="M100 120 L100 170" stroke="#fff" strokeWidth="2" />
-              <path d="M35 143 L97 125 L97 167 L35 185 Z" fill="#1f7d6a" />
-              <path d="M103 125 L165 143 L165 185 L103 167 Z" fill="#1f7d6a" />
-              <line x1="100" y1="126" x2="100" y2="150" stroke="#c8a840" strokeWidth="3" />
-              <line x1="90" y1="134" x2="110" y2="134" stroke="#c8a840" strokeWidth="3" />
-              <path d="M100 15 C85 50 70 70 75 95 C78 110 88 118 100 120 C112 118 122 110 125 95 C130 70 115 50 100 15Z" fill="#c8a840" />
-            </svg>
+            <img src="/sda-logo.png" alt="SDA Logo" className="w-[28px] h-[32px] object-contain shrink-0" />
             <span>{APP_NAME}</span>
           </h1>
         </div>

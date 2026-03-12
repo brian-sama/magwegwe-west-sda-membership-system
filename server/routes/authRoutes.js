@@ -3,12 +3,13 @@ const router = express.Router();
 const db = require('../db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { auth } = require('../middleware/auth');
 
 // Login Route
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
     try {
-        const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+        const { rows: users } = await db.query('SELECT * FROM users WHERE email = $1', [email]);
 
         if (users.length === 0) {
             return res.status(401).json({ message: 'Invalid credentials' });
@@ -16,12 +17,7 @@ router.post('/login', async (req, res) => {
 
         const user = users[0];
 
-        // In a real app, compare hash. For migration of existing mock data, we might need a strategy.
-        // Assuming new users are created with hashed passwords.
-        // const match = await bcrypt.compare(password, user.password_hash);
-
-        // TEMPORARY: Simple check if password_hash matches plain text (for initial setup) 
-        // OR if using bcrypt (recommended):
+        // Check password hash
         const match = await bcrypt.compare(password, user.password_hash);
 
         if (!match) {
@@ -35,7 +31,7 @@ router.post('/login', async (req, res) => {
         );
 
         // Update last login
-        await db.query('UPDATE users SET last_login = NOW() WHERE id = ?', [user.id]);
+        await db.query('UPDATE users SET last_login = NOW() WHERE id = $1', [user.id]);
 
         res.json({
             token,
@@ -50,6 +46,19 @@ router.post('/login', async (req, res) => {
 
     } catch (err) {
         console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Me Route (Verify current token)
+router.get('/me', auth, async (req, res) => {
+    try {
+        const { rows: users } = await db.query('SELECT id, name, email, role, last_login FROM users WHERE id = $1', [req.user.id]);
+        if (users.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        res.json(users[0]);
+    } catch (err) {
         res.status(500).json({ message: 'Server error' });
     }
 });

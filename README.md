@@ -1,9 +1,9 @@
 # Magwegwe West SDA Membership System
 
-Production-ready stack:
+Production stack:
 - React frontend (Vite)
-- Laravel 12 API (`backend/`)
-- MySQL (cPanel target)
+- Plain PHP + PDO API (`api/`) for cPanel shared hosting
+- MySQL
 
 ## Local Development
 
@@ -13,22 +13,17 @@ npm install
 npm run dev
 ```
 
-### Backend (Laravel)
+### Backend (Plain PHP)
 ```bash
-cd backend
-php ../composer.phar install --no-dev --prefer-dist --ignore-platform-req=ext-gd --ignore-platform-req=ext-zip
+cd api
 cp .env.example .env
-php artisan key:generate
-php artisan migrate
-php artisan db:seed
-php artisan legacy:import   # optional, if legacy_* tables exist
-php artisan serve
+# Update DB credentials in .env
+php -S localhost:8000
 ```
 
 API base (frontend):
 - `VITE_API_BASE_URL=http://localhost:8000/api/v1`
 
 ## Deployment
-See:
-- `backend/DEPLOYMENT.md`
-- `backend/CUTOVER.md`
+- cPanel API/backend docs: `api/README.md`
+- root deployment flow: `DEPLOYMENT_INSTRUCTIONS.txt`
