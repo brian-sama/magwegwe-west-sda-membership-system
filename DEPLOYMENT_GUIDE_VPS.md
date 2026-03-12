@@ -36,7 +36,7 @@ Inside the `psql` shell (**Run these one by one** to avoid connection errors):
 
 ```sql
 CREATE DATABASE magwegwe_membership;
-CREATE USER magwegwe_admin WITH ENCRYPTED PASSWORD 'your_secure_password';
+CREATE USER magwegwe_admin WITH ENCRYPTED PASSWORD 'Brian7350';
 GRANT ALL PRIVILEGES ON DATABASE magwegwe_membership TO magwegwe_admin;
 -- Connect separately to grant schema permissions
 \c magwegwe_membership

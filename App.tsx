@@ -19,6 +19,7 @@ import { api } from './src/services/api';
 const App: React.FC = () => {
   const [authState, setAuthState] = useState<AuthState>({ user: null, isAuthenticated: false });
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [loading, setLoading] = useState(true);
 
   const [members, setMembers] = useState<Member[]>([]);
   const [youthMembers, setYouthMembers] = useState<YouthMember[]>([]);
@@ -209,6 +210,35 @@ const App: React.FC = () => {
     anchor.remove();
     window.URL.revokeObjectURL(url);
   };
+
+  useEffect(() => {
+    const restoreSession = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const user = await api.auth.me();
+          setAuthState({ user, isAuthenticated: true });
+        } catch (err) {
+          console.error('Session restoration failed:', err);
+          localStorage.removeItem('token');
+        }
+      }
+      setLoading(false);
+    };
+
+    restoreSession();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <img src="/sda-logo.png" alt="SDA Logo" className="w-[80px] h-[90px] animate-pulse" />
+          <p className="text-white/60 text-sm font-medium">Restoring session...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!authState.isAuthenticated) return <LoginForm onLogin={handleLogin} />;
 
