@@ -47,8 +47,10 @@ app.listen(PORT, async () => {
     try {
         await db.query("SELECT 1");
         console.log(`Server running on port ${PORT}`);
-        console.log(`Database connected successfully`);
+        console.log(`Database connected successfully to ${process.env.DB_NAME} on ${process.env.DB_HOST}`);
     } catch (err) {
-        console.error("Database connection failed:", err.message);
+        console.error("CRITICAL: Database connection failed!");
+        console.error("Error details:", err.message);
+        console.error("Check your .env file and ensure the database is running.");
     }
 });
