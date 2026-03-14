@@ -138,7 +138,17 @@ export const api = {
         }).then(handleResponse),
     },
     logs: {
-        getAll: () => fetch(`${API_URL}/logs`, { headers: getHeaders() }).then(handleResponse).then(extractData),
+        getAll: () => fetch(`${API_URL}/logs`, { headers: getHeaders() }).then(handleResponse).then((payload) => {
+            const items = extractData(payload);
+            return Array.isArray(items) ? items.map((item: any) => ({
+                id: item.id,
+                timestamp: item.timestamp || item.created_at,
+                userId: item.user_id || 'system',
+                userName: item.user_name || 'System',
+                action: item.action,
+                details: item.details
+            })) : [];
+        }),
         create: (data: any) => fetch(`${API_URL}/logs`, {
             method: 'POST',
             headers: getHeaders(),

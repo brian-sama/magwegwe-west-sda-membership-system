@@ -301,7 +301,14 @@ const MemberDirectory: React.FC<MemberDirectoryProps> = ({ members, userRole, on
           )}
           {(userRole === UserRole.ADMIN || userRole === UserRole.CLERK) && onImportMembers && (
             <>
-              <input type="file" ref={fileInputRef} accept=".csv" onChange={handleCSVImport} className="hidden" />
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                accept=".csv" 
+                onChange={handleCSVImport} 
+                className="hidden" 
+                title="CSV Import File Picker"
+              />
               <button
                 onClick={() => fileInputRef.current?.click()}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 whitespace-nowrap bg-violet-600 text-white hover:bg-violet-700"

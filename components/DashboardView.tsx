@@ -82,7 +82,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ members, logs, userRole }
             <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">Registry Composition</h3>
             <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded">Real-time Data</span>
           </div>
-          <div className="h-64 w-full flex-1">
+          <div className="h-64 w-full flex-1" style={{ minHeight: '256px' }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
@@ -163,8 +163,10 @@ const DashboardView: React.FC<DashboardViewProps> = ({ members, logs, userRole }
                     </td>
                     <td className="px-6 py-4">
                        <div className="flex items-center gap-2">
-                         <div className="w-6 h-6 rounded-lg bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-400">{log.userName.charAt(0)}</div>
-                         <p className="font-bold text-slate-700">{log.userName}</p>
+                         <div className="w-6 h-6 rounded-lg bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-400">
+                           {(log.userName || 'U').charAt(0)}
+                         </div>
+                         <p className="font-bold text-slate-700">{log.userName || 'Unknown User'}</p>
                        </div>
                     </td>
                     <td className="px-6 py-4">
