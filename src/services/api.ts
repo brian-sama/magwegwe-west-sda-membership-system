@@ -164,6 +164,9 @@ export const api = {
     search: {
         global: (q: string) => fetch(`${API_URL}/search/global?q=${encodeURIComponent(q)}`, { headers: getHeaders() }).then(handleResponse).then(extractData),
     },
+    analytics: {
+        insights: async (prompt: string) => ({ insight: "Analytics engine is initializing. Please check back later." }),
+    },
 };
 
 

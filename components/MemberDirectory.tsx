@@ -290,7 +290,7 @@ const MemberDirectory: React.FC<MemberDirectoryProps> = ({ members, userRole, on
         </div>
 
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto justify-end">
-          {onAddMember && (
+          {(userRole === UserRole.ADMIN || userRole === UserRole.CLERK) && onAddMember && (
             <button
               onClick={onAddMember}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 whitespace-nowrap bg-emerald-600 text-white hover:bg-emerald-700"
@@ -299,7 +299,7 @@ const MemberDirectory: React.FC<MemberDirectoryProps> = ({ members, userRole, on
               Add Member
             </button>
           )}
-          {onImportMembers && (
+          {(userRole === UserRole.ADMIN || userRole === UserRole.CLERK) && onImportMembers && (
             <>
               <input type="file" ref={fileInputRef} accept=".csv" onChange={handleCSVImport} className="hidden" />
               <button

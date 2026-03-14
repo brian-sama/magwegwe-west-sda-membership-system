@@ -313,25 +313,21 @@ const App: React.FC = () => {
           {activeTab === 'dorcas' && <SocietyRegistryView type={SocietyType.DORCAS} members={societyMembers.filter(m => m.type === SocietyType.DORCAS)} userRole={role!} />}
           {activeTab === 'amo' && <SocietyRegistryView type={SocietyType.AMO} members={societyMembers.filter(m => m.type === SocietyType.AMO)} userRole={role!} />}
 
-          {(isAdmin || role === UserRole.CLERK) && (
-            <>
-              {activeTab === 'add-member' && <AddMemberForm onAdd={handleAddMember} />}
-              {activeTab === 'add-youth' && (
-                <div className="space-y-6">
-                  <YouthRegistrationForm club={YouthClubType.PATHFINDER} onAdd={handleAddYouth} />
-                  <YouthRegistrationForm club={YouthClubType.ADVENTURER} onAdd={handleAddYouth} />
-                </div>
-              )}
-              {activeTab === 'add-society' && (
-                <div className="space-y-6">
-                  <SocietyRegistrationForm type={SocietyType.DORCAS} onAdd={handleAddSociety} />
-                  <SocietyRegistrationForm type={SocietyType.AMO} onAdd={handleAddSociety} />
-                </div>
-              )}
-              {activeTab === 'users' && isAdmin && <UserManagement users={systemUsers} onAddUser={handleAddUser} onDeleteUser={handleDeleteUser} currentUserId={authState.user?.id || ''} />}
-              {activeTab === 'logs' && <AuditLogsView logs={auditLogs} />}
-            </>
+          {(isAdmin || role === UserRole.CLERK) && activeTab === 'add-member' && <AddMemberForm onAdd={handleAddMember} />}
+          {(isAdmin || role === UserRole.CLERK) && activeTab === 'add-youth' && (
+            <div className="space-y-6">
+              <YouthRegistrationForm club={YouthClubType.PATHFINDER} onAdd={handleAddYouth} />
+              <YouthRegistrationForm club={YouthClubType.ADVENTURER} onAdd={handleAddYouth} />
+            </div>
           )}
+          {(isAdmin || role === UserRole.CLERK) && activeTab === 'add-society' && (
+            <div className="space-y-6">
+              <SocietyRegistrationForm type={SocietyType.DORCAS} onAdd={handleAddSociety} />
+              <SocietyRegistrationForm type={SocietyType.AMO} onAdd={handleAddSociety} />
+            </div>
+          )}
+          {isAdmin && activeTab === 'users' && <UserManagement users={systemUsers} onAddUser={handleAddUser} onDeleteUser={handleDeleteUser} currentUserId={authState.user?.id || ''} />}
+          {(isAdmin || role === UserRole.CLERK) && activeTab === 'logs' && <AuditLogsView logs={auditLogs} />}
         </div>
       </main>
     </div>
