@@ -33,6 +33,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, onAddUser, onDel
     switch (role) {
       case UserRole.ADMIN: return 'bg-red-100 text-red-700';
       case UserRole.PASTOR: return 'bg-indigo-100 text-indigo-700';
+      case UserRole.ELDER: return 'bg-blue-100 text-blue-700';
       case UserRole.CLERK: return 'bg-amber-100 text-amber-700';
       default: return 'bg-slate-100 text-slate-700';
     }

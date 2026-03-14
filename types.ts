@@ -2,6 +2,7 @@ export enum UserRole {
   ADMIN = 'Admin',
   PASTOR = 'Pastor',
   CLERK = 'Clerk',
+  ELDER = 'Elder',
   VIEWER = 'Viewer',
 }
 

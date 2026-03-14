@@ -406,7 +406,7 @@ const MemberDirectory: React.FC<MemberDirectoryProps> = ({ members, userRole, on
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {isAdmin ? (
+                        {(userRole === UserRole.ADMIN || userRole === UserRole.CLERK) ? (
                           <>
                             {!isTransferredOut && (
                               <>
@@ -580,7 +580,7 @@ const MemberDirectory: React.FC<MemberDirectoryProps> = ({ members, userRole, on
                   )}
 
                   <div className="flex gap-3 pt-2">
-                    {isAdmin && memberModal.member.status !== MemberStatus.TRANSFERRED_OUT && (
+                    {(userRole === UserRole.ADMIN || userRole === UserRole.CLERK) && memberModal.member.status !== MemberStatus.TRANSFERRED_OUT && (
                       <>
                         {memberModal.member.status === MemberStatus.INACTIVE ? (
                           <button

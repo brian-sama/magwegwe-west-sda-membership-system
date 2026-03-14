@@ -14,6 +14,7 @@ import SocietyRegistrationForm from './components/SocietyRegistrationForm';
 import AttendanceView from './components/AttendanceView';
 import ReportsView from './components/ReportsView';
 import SettingsView from './components/SettingsView';
+import AddUserForm from './components/AddUserForm';
 import { api } from './src/services/api';
 
 const App: React.FC = () => {
@@ -268,7 +269,7 @@ const App: React.FC = () => {
           <SidebarItem icon={<ICONS.Heart />} label="Dorcas" active={activeTab === 'dorcas'} onClick={() => setActiveTab('dorcas')} />
           <SidebarItem icon={<ICONS.Hammer />} label="Adventist Men (AMO)" active={activeTab === 'amo'} onClick={() => setActiveTab('amo')} />
 
-          {(isAdmin || role === UserRole.CLERK) && (
+          {(isAdmin || role === UserRole.CLERK || role === UserRole.PASTOR || role === UserRole.ELDER) && (
             <>
               <div className="pt-4 pb-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-widest">Registry Admin</div>
               <SidebarItem icon={<ICONS.UserPlus />} label="Register Member" active={activeTab === 'add-member'} onClick={() => setActiveTab('add-member')} />
@@ -276,7 +277,12 @@ const App: React.FC = () => {
               <SidebarItem icon={<ICONS.Plus />} label="Enroll Society" active={activeTab === 'add-society'} onClick={() => setActiveTab('add-society')} />
 
               <div className="pt-4 pb-2 px-3 text-xs font-semibold text-slate-500 uppercase tracking-widest">System</div>
-              {isAdmin && <SidebarItem icon={<ICONS.Settings />} label="Manage Users" active={activeTab === 'users'} onClick={() => setActiveTab('users')} />}
+              {isAdmin && (
+                <>
+                  <SidebarItem icon={<ICONS.UserPlus />} label="Add User" active={activeTab === 'add-user'} onClick={() => setActiveTab('add-user')} />
+                  <SidebarItem icon={<ICONS.Settings />} label="Manage Users" active={activeTab === 'users'} onClick={() => setActiveTab('users')} />
+                </>
+              )}
               <SidebarItem icon={<ICONS.Log />} label="Security Logs" active={activeTab === 'logs'} onClick={() => setActiveTab('logs')} />
             </>
           )}
@@ -326,8 +332,9 @@ const App: React.FC = () => {
               <SocietyRegistrationForm type={SocietyType.AMO} onAdd={handleAddSociety} />
             </div>
           )}
+          {isAdmin && activeTab === 'add-user' && <AddUserForm onAdd={handleAddUser} onCancel={() => setActiveTab('users')} />}
           {isAdmin && activeTab === 'users' && <UserManagement users={systemUsers} onAddUser={handleAddUser} onDeleteUser={handleDeleteUser} currentUserId={authState.user?.id || ''} />}
-          {(isAdmin || role === UserRole.CLERK) && activeTab === 'logs' && <AuditLogsView logs={auditLogs} />}
+          {(isAdmin || role === UserRole.CLERK || role === UserRole.ELDER || role === UserRole.PASTOR) && activeTab === 'logs' && <AuditLogsView logs={auditLogs} />}
         </div>
       </main>
     </div>
