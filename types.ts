@@ -1,9 +1,9 @@
 export enum UserRole {
-  ADMIN = 'Admin',
-  PASTOR = 'Pastor',
-  CLERK = 'Clerk',
-  ELDER = 'Elder',
-  VIEWER = 'Viewer',
+  ADMIN = 'ADMIN',
+  PASTOR = 'PASTOR',
+  CLERK = 'CLERK',
+  ELDER = 'ELDER',
+  VIEWER = 'VIEWER',
 }
 
 export enum MemberStatus {
